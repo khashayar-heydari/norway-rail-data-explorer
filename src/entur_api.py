@@ -1,4 +1,5 @@
 import requests
+from database import create_database, save_departure
 
 GEOCODER_URL = "https://api.entur.io/geocoder/v3/autocomplete"
 JOURNEY_PLANNER_URL = "https://api.entur.io/journey-planner/v3/graphql"
@@ -73,6 +74,8 @@ def get_departures(stop_place_id):
     return response.json()
 
 
+create_database()
+
 station = search_station("Tønsberg")
 
 if station:
@@ -87,13 +90,25 @@ if station:
         line = call["serviceJourney"]["line"]["publicCode"]
         destination = call["destinationDisplay"]["frontText"]
 
-        scheduled = call["aimedDepartureTime"][11:16]
-        expected = call["expectedDepartureTime"][11:16]
+        scheduled_time = call["aimedDepartureTime"]
+        expected_time = call["expectedDepartureTime"]
+
+        scheduled_display = scheduled_time[11:16]
+        expected_display = expected_time[11:16]
 
         print()
         print(f"{line} -> {destination}")
-        print(f"Scheduled: {scheduled}")
-        print(f"Expected:  {expected}")
+        print(f"Scheduled: {scheduled_display}")
+        print(f"Expected:  {expected_display}")
+
+        save_departure(
+            station["id"],
+            station["name"],
+            line,
+            destination,
+            scheduled_time,
+            expected_time
+        )
 
 else:
     print("Station not found")

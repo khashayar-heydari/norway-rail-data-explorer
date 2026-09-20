@@ -24,6 +24,16 @@ def create_database():
         )
     """)
 
+    cursor.execute("""
+        CREATE UNIQUE INDEX IF NOT EXISTS unique_departure
+        ON departures (
+            station_id,
+            line,
+            destination,
+            scheduled_time
+        )
+    """)
+
     connection.commit()
     connection.close()
 
@@ -51,6 +61,15 @@ def save_departure(
             collected_at
         )
         VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
+        ON CONFLICT (
+            station_id,
+            line,
+            destination,
+            scheduled_time
+        )
+        DO UPDATE SET
+            expected_time = excluded.expected_time,
+            collected_at = datetime('now')
         """,
         (
             station_id,
@@ -66,6 +85,6 @@ def save_departure(
     connection.close()
 
 
-create_database()
-
-print("Database created successfully.")
+if __name__ == "__main__":
+    create_database()
+    print("Database created successfully.")
