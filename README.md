@@ -1,20 +1,27 @@
 # Norway Rail Data Explorer
 
-A Python project for collecting and exploring Norwegian railway data using the Entur API and SQLite.
+A Python project for collecting and analysing Norwegian railway departure data using the Entur API.
 
-The project is being built as a way to learn more about APIs, data processing, databases, and Python.
+I built this project to get more experience working with APIs, databases, data processing and Python.
 
-## Planned features
+## What it does
+
+The program can:
 
 - Search for Norwegian railway stations
-- Fetch departure data from Entur
-- Store collected data in SQLite
-- Compare scheduled and expected departure times
-- Explore and analyse collected railway data
+- Fetch upcoming departures from Entur
+- Show scheduled and expected departure times
+- Store departure data in a SQLite database
+- Avoid storing duplicate departures
+- Calculate delays
+- Compare delay statistics between stations
+- Generate a graph of average delays using Matplotlib
 
-## Technologies
+## Project structure
 
-- Python
-- SQLite
-- Entur API
-- Git and GitHub
+```text
+src/
+├── entur_api.py
+├── database.py
+├── analysis.py
+└── visualization.py
