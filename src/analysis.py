@@ -10,12 +10,13 @@ def get_departures():
 
     cursor.execute("""
         SELECT
+            station_name,
             line,
             destination,
             scheduled_time,
             expected_time
         FROM departures
-        ORDER BY scheduled_time
+        ORDER BY station_name, scheduled_time
     """)
 
     departures = cursor.fetchall()
@@ -42,11 +43,8 @@ def main():
 
     delays = []
 
-    for line, destination, scheduled_time, expected_time in departures:
-        delay = calculate_delay(
-            scheduled_time,
-            expected_time
-        )
+    for station_name, line, destination, scheduled_time, expected_time in departures:
+        delay = calculate_delay(scheduled_time, expected_time)
 
         if delay is not None:
             delays.append(delay)
@@ -59,8 +57,8 @@ def main():
         delay for delay in delays if delay <= 0
     ]
 
-    print("Departure summary")
-    print("-----------------")
+    print("Overall summary")
+    print("---------------")
     print(f"Total departures: {len(departures)}")
     print(f"Delayed departures: {len(delayed_departures)}")
     print(f"On-time departures: {len(on_time_departures)}")
@@ -72,15 +70,46 @@ def main():
         print(f"Average delay: {average_delay:.1f} minutes")
         print(f"Largest delay: {largest_delay:.1f} minutes")
 
+    station_data = {}
+
+    for station_name, line, destination, scheduled_time, expected_time in departures:
+        if station_name not in station_data:
+            station_data[station_name] = []
+
+        delay = calculate_delay(scheduled_time, expected_time)
+
+        station_data[station_name].append(delay)
+
+    print()
+    print("Station summary")
+    print("---------------")
+
+    for station_name, station_delays in station_data.items():
+        known_delays = [
+            delay for delay in station_delays if delay is not None
+        ]
+
+        delayed = [
+            delay for delay in known_delays if delay > 0
+        ]
+
+        print()
+        print(station_name)
+        print(f"Departures: {len(station_delays)}")
+        print(f"Delayed: {len(delayed)}")
+
+        if delayed:
+            average_delay = sum(delayed) / len(delayed)
+            print(f"Average delay: {average_delay:.1f} minutes")
+        else:
+            print("Average delay: 0.0 minutes")
+
     print()
     print("Departure details")
     print("-----------------")
 
-    for line, destination, scheduled_time, expected_time in departures:
-        delay = calculate_delay(
-            scheduled_time,
-            expected_time
-        )
+    for station_name, line, destination, scheduled_time, expected_time in departures:
+        delay = calculate_delay(scheduled_time, expected_time)
 
         scheduled_display = datetime.fromisoformat(
             scheduled_time
@@ -94,6 +123,7 @@ def main():
             expected_display = "-"
 
         print()
+        print(f"{station_name}")
         print(f"{line} -> {destination}")
         print(f"Scheduled: {scheduled_display}")
         print(f"Expected:  {expected_display}")
