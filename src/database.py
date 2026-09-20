@@ -28,6 +28,44 @@ def create_database():
     connection.close()
 
 
+def save_departure(
+    station_id,
+    station_name,
+    line,
+    destination,
+    scheduled_time,
+    expected_time
+):
+    connection = sqlite3.connect(DATABASE_PATH)
+    cursor = connection.cursor()
+
+    cursor.execute(
+        """
+        INSERT INTO departures (
+            station_id,
+            station_name,
+            line,
+            destination,
+            scheduled_time,
+            expected_time,
+            collected_at
+        )
+        VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
+        """,
+        (
+            station_id,
+            station_name,
+            line,
+            destination,
+            scheduled_time,
+            expected_time
+        )
+    )
+
+    connection.commit()
+    connection.close()
+
+
 create_database()
 
 print("Database created successfully.")
